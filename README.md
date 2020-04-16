@@ -1,5 +1,5 @@
 # Number-Guess
-Drawn number is predicted by a Convolutional Neural Network.
+Drawn number is predicted by a Convolutional Neural Network.</br>
 Try it on https://numberguess-47e1d.firebaseapp.com/
 
 <p>
