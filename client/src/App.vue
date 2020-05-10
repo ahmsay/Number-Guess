@@ -2,7 +2,9 @@
   <div id="app">
     <div class="left" align="center">
       <div style="padding-bottom: 10px">Draw your number</div>
-      <div><canvas id="canvas" @mousedown="handleMouseDown" @mouseup="handleMouseUp" @mousemove="handleMouseMove" @mouseleave="handleMouseUp" width="200px" height="200px"></canvas></div>
+      <div>
+        <canvas id="canvas" @mousedown="handleMouseDown" @mouseup="handleMouseUp" @mousemove="handleMouseMove" @mouseleave="handleMouseUp" width="200px" height="200px"/>
+      </div>
       <div style="padding: 10px 0px 10px 0px">
         <button class="btn" @click="send">Predict</button>
         <button class="btn" @click="clear">Clear</button>
@@ -20,7 +22,6 @@
         <span v-if="connected">Connected</span>
       </div>
     </div>
-    <div style="color: #fff; text-align: center; position: absolute; bottom: 10px;">Ahmet Say</div>
   </div>
 </template>
 
@@ -28,14 +29,27 @@
 export default {
   name: 'app',
   beforeCreate() {
-    this.$http.get('https://safe-tor-75945.herokuapp.com/')
-    .then(function(){
-      this.connected = true;
-    });
+    this.$http.get(this.url)
+    .then(() => {
+      this.connected = true
+    })
+  },
+  mounted: function() {
+    this.canvas = document.getElementById("canvas")
+    this.context = this.canvas.getContext("2d")
+    this.canvas.addEventListener("touchstart", function (event) {
+      this.handleTouchStart(event)
+    }.bind(this), false)
+    this.canvas.addEventListener("touchend", function () {
+      this.handleTouched()
+    }.bind(this), false)
+    this.canvas.addEventListener("touchmove", function (event) {
+      this.handleTouchMove(event)
+    }.bind(this), false)
   },
   data() {
     return {
-      time: false,
+      url: 'https://safe-tor-75945.herokuapp.com/',
       connected: false,
       firstGuess: '-',
       secondGuess: '-',
@@ -49,13 +63,14 @@ export default {
           y: 0
         },
         down: false
-      }
+      },
+      canvas: null,
+      context: null
     }
   },
   computed: {
     currentMouse: function() {
-      var c = document.getElementById("canvas");
-      var rect = c.getBoundingClientRect();
+      var rect = this.canvas.getBoundingClientRect()
       return {
         x: this.mouse.current.x - rect.left,
         y: this.mouse.current.y - rect.top
@@ -65,74 +80,81 @@ export default {
   methods: {
     draw: function() {
       if (this.mouse.down) {
-        var c = document.getElementById("canvas");
-        var ctx = c.getContext("2d");
-        ctx.strokeStyle ="#FFFFFF";
-        ctx.lineCap="round";
-        ctx.lineJoin = "round"
-        ctx.lineWidth = 20;
-        ctx.lineTo(this.currentMouse.x, this.currentMouse.y);
-        ctx.stroke();
+        this.context.strokeStyle ="#FFFFFF"
+        this.context.lineCap="round"
+        this.context.lineJoin = "round"
+        this.context.lineWidth = 20
+        this.context.lineTo(this.currentMouse.x, this.currentMouse.y)
+        this.context.stroke()
       }
     },
     handleMouseDown: function(event) {
-      this.mouse.down = true;
+      this.mouse.down = true
       this.mouse.current = {
         x: event.pageX,
         y: event.pageY
       }
-      var c = document.getElementById("canvas");
-      var ctx = c.getContext("2d");
-      ctx.beginPath();
-      ctx.moveTo(this.currentMouse.x, this.currentMouse.y)
+      this.context.beginPath()
+      this.context.moveTo(this.currentMouse.x, this.currentMouse.y)
     },
     handleMouseUp: function() {
-      this.mouse.down = false;
-      var c = document.getElementById("canvas");
-      var ctx = c.getContext("2d");
-      ctx.closePath();
+      this.mouse.down = false
+      this.context.closePath()
     },
     handleMouseMove: function(event) {
       this.mouse.current = {
         x: event.pageX,
         y: event.pageY
       }
-      this.draw(event);
+      this.draw()
+    },
+    handleTouchStart: function(event) {
+      this.mouse.down = true
+      this.mouse.current = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY
+      }
+      this.context.beginPath()
+      this.context.moveTo(this.currentMouse.x, this.currentMouse.y)
+    },
+    handleTouched: function() {
+      this.mouse.down = false
+      this.context.closePath()
+    },
+    handleTouchMove: function(event) {
+      this.mouse.current = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY
+      }
+      this.draw()
     },
     send: function() {
       if (this.connected) {
-        var canvas = document.getElementById("canvas");
-        var dataURL = canvas.toDataURL();
-        this.$http.post('https://safe-tor-75945.herokuapp.com/', {'data': dataURL})
+        var dataURL = this.canvas.toDataURL();
+        this.$http.post(this.url, { 'data': dataURL })
         .then(function(data){
-          return data.json();
-        }).then(function(data){
-          this.display(data['pred']);
-        });
+          this.display(data.body.pred)
+        })
       } else {
-        alert("The server is not ready yet. It will be ready in a few seconds.");
+        alert("The server is not ready yet. It will be ready in a few seconds.")
       }
     },
     clear: function() {
-      var c = document.getElementById("canvas");
-      var ctx = c.getContext('2d');
-      ctx.clearRect(0, 0, c.width, c.height);
-      this.firstGuess = '-';
-      this.secondGuess = '-';
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+      this.firstGuess = '-'
+      this.secondGuess = '-'
     },
     display: function(arr) {
-      var pred = arr;
+      var pred = arr
       var predSorted = pred.slice();
-      predSorted.sort(function(a,b){return a - b});
-      this.firstGuess = pred.indexOf(predSorted[9]);
-      this.secondGuess = pred.indexOf(predSorted[8]);
+      predSorted.sort(function(a,b){return a - b})
+      this.firstGuess = pred.indexOf(predSorted[9])
+      this.secondGuess = pred.indexOf(predSorted[8])
     }
   },
   ready: function() {
-    var c = document.getElementById("canvas");
-    var ctx = c.getContext("2d");
-    ctx.translate(0.5, 0.5);
-    ctx.imageSmoothingEnabled = false;
+    this.context.translate(0.5, 0.5)
+    this.context.imageSmoothingEnabled = false
   }
 }
 </script>
