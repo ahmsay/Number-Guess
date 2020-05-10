@@ -47,7 +47,6 @@
     },
     mounted: function() {
       this.canvas = document.getElementById("canvas")
-      this.rect = this.canvas.getBoundingClientRect()
       this.context = this.canvas.getContext("2d")
       this.context.strokeStyle ="#FFFFFF"
       this.context.lineCap="round"
@@ -65,12 +64,15 @@
       }.bind(this), false)
       
       this.canvas.addEventListener("touchstart", function (event) {
+        event.preventDefault()
         this.handleInputStart(event.touches[0].clientX, event.touches[0].clientY)
       }.bind(this), false)
       this.canvas.addEventListener("touchend", function () {
+        event.preventDefault()
         this.handleInputEnd()
       }.bind(this), false)
       this.canvas.addEventListener("touchmove", function (event) {
+        event.preventDefault()
         this.handleInputMove(event.touches[0].clientX, event.touches[0].clientY)
       }.bind(this), false)
     },
@@ -95,9 +97,10 @@
     },
     computed: {
       currentMouse: function() {
+        let rect = this.canvas.getBoundingClientRect()
         return {
-          x: this.mouse.current.x - this.rect.left,
-          y: this.mouse.current.y - this.rect.top
+          x: this.mouse.current.x - rect.left,
+          y: this.mouse.current.y - rect.top
         }
       }
     },
