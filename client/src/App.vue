@@ -8,8 +8,12 @@
               <v-card-text>
                 <p class="white--text text-center title">Draw a Number</p>
                 <canvas id="canvas" style="background: black" @mouseleave="handleInputEnd" :width="canvasSize" :height="canvasSize"/>
-                <div class="subtitle-1 white--text mt-3">Your number: {{firstGuess}}</div>
-                <div class="white--text">Second guess: {{secondGuess}}</div>
+                <div class="title white--text mt-3">
+                  Your number: {{firstGuess}}
+                </div>
+                <div class="white--text">
+                  Second guess: {{secondGuess}}
+                </div>
               </v-card-text>
               <v-card-text class="pt-0 pb-2">
                 <v-layout row wrap>
