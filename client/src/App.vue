@@ -3,7 +3,7 @@
     <div class="left" align="center">
       <div style="padding-bottom: 10px">Draw your number</div>
       <div>
-        <canvas id="canvas" @mousedown="handleMouseDown" @mouseup="handleMouseUp" @mousemove="handleMouseMove" @mouseleave="handleMouseUp" width="200px" height="200px"/>
+        <canvas id="canvas" @mouseleave="handleInputEnd" width="200px" height="200px"/>
       </div>
       <div style="padding: 10px 0px 10px 0px">
         <button class="btn" @click="send">Predict</button>
@@ -29,22 +29,35 @@
 export default {
   name: 'app',
   beforeCreate() {
-    this.$http.get(this.url)
-    .then(() => {
-      this.connected = true
-    })
+    this.$http.get(this.url).then(() => { this.connected = true })
   },
   mounted: function() {
     this.canvas = document.getElementById("canvas")
+    this.rect = this.canvas.getBoundingClientRect()
     this.context = this.canvas.getContext("2d")
+    this.context.strokeStyle ="#FFFFFF"
+    this.context.lineCap="round"
+    this.context.lineJoin = "round"
+    this.context.lineWidth = 20
+
+    this.canvas.addEventListener("mousedown", function (event) {
+      this.handleInputStart(event.pageX, event.pageY)
+    }.bind(this), false)
+    this.canvas.addEventListener("mouseup", function () {
+      this.handleInputEnd()
+    }.bind(this), false)
+    this.canvas.addEventListener("mousemove", function (event) {
+      this.handleInputMove(event.pageX, event.pageY)
+    }.bind(this), false)
+    
     this.canvas.addEventListener("touchstart", function (event) {
-      this.handleTouchStart(event)
+      this.handleInputStart(event.touches[0].clientX, event.touches[0].clientY)
     }.bind(this), false)
     this.canvas.addEventListener("touchend", function () {
-      this.handleTouched()
+      this.handleInputEnd()
     }.bind(this), false)
     this.canvas.addEventListener("touchmove", function (event) {
-      this.handleTouchMove(event)
+      this.handleInputMove(event.touches[0].clientX, event.touches[0].clientY)
     }.bind(this), false)
   },
   data() {
@@ -58,10 +71,6 @@ export default {
           x: 0,
           y: 0
         },
-        previous: {
-          x: 0,
-          y: 0
-        },
         down: false
       },
       canvas: null,
@@ -70,67 +79,41 @@ export default {
   },
   computed: {
     currentMouse: function() {
-      var rect = this.canvas.getBoundingClientRect()
       return {
-        x: this.mouse.current.x - rect.left,
-        y: this.mouse.current.y - rect.top
+        x: this.mouse.current.x - this.rect.left,
+        y: this.mouse.current.y - this.rect.top
       }
     }
   },
   methods: {
+    handleInputStart: function(x, y) {
+      this.mouse.down = true
+      this.mouse.current = { x, y }
+      this.context.beginPath()
+      this.context.moveTo(this.currentMouse.x, this.currentMouse.y)
+    },
+    handleInputEnd: function() {
+      this.mouse.down = false
+      this.context.closePath()
+    },
+    handleInputMove: function(x, y) {
+      this.mouse.current = { x, y }
+      this.draw()
+    },
     draw: function() {
       if (this.mouse.down) {
-        this.context.strokeStyle ="#FFFFFF"
-        this.context.lineCap="round"
-        this.context.lineJoin = "round"
-        this.context.lineWidth = 20
         this.context.lineTo(this.currentMouse.x, this.currentMouse.y)
         this.context.stroke()
       }
     },
-    handleMouseDown: function(event) {
-      this.mouse.down = true
-      this.mouse.current = {
-        x: event.pageX,
-        y: event.pageY
-      }
-      this.context.beginPath()
-      this.context.moveTo(this.currentMouse.x, this.currentMouse.y)
-    },
-    handleMouseUp: function() {
-      this.mouse.down = false
-      this.context.closePath()
-    },
-    handleMouseMove: function(event) {
-      this.mouse.current = {
-        x: event.pageX,
-        y: event.pageY
-      }
-      this.draw()
-    },
-    handleTouchStart: function(event) {
-      this.mouse.down = true
-      this.mouse.current = {
-        x: event.touches[0].clientX,
-        y: event.touches[0].clientY
-      }
-      this.context.beginPath()
-      this.context.moveTo(this.currentMouse.x, this.currentMouse.y)
-    },
-    handleTouched: function() {
-      this.mouse.down = false
-      this.context.closePath()
-    },
-    handleTouchMove: function(event) {
-      this.mouse.current = {
-        x: event.touches[0].clientX,
-        y: event.touches[0].clientY
-      }
-      this.draw()
+    clear: function() {
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+      this.firstGuess = '-'
+      this.secondGuess = '-'
     },
     send: function() {
       if (this.connected) {
-        var dataURL = this.canvas.toDataURL();
+        const dataURL = this.canvas.toDataURL();
         this.$http.post(this.url, { 'data': dataURL })
         .then(function(data){
           this.display(data.body.pred)
@@ -139,22 +122,11 @@ export default {
         alert("The server is not ready yet. It will be ready in a few seconds.")
       }
     },
-    clear: function() {
-      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
-      this.firstGuess = '-'
-      this.secondGuess = '-'
-    },
-    display: function(arr) {
-      var pred = arr
-      var predSorted = pred.slice();
-      predSorted.sort(function(a,b){return a - b})
-      this.firstGuess = pred.indexOf(predSorted[9])
-      this.secondGuess = pred.indexOf(predSorted[8])
+    display: function(predictions) {
+      const predSorted = new Array(...predictions).sort((a, b) => { return a - b });
+      this.firstGuess = predictions.indexOf(predSorted[9]);
+      this.secondGuess = predictions.indexOf(predSorted[8]);
     }
-  },
-  ready: function() {
-    this.context.translate(0.5, 0.5)
-    this.context.imageSmoothingEnabled = false
   }
 }
 </script>
