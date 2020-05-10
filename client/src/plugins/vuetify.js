@@ -4,4 +4,12 @@ import Vuetify from 'vuetify/lib';
 Vue.use(Vuetify);
 
 export default new Vuetify({
+  theme: {
+    themes: {
+      dark: {
+        background: '#35495e',
+        card: '#48627c'
+      }
+    }
+  }
 });
