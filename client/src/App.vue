@@ -41,7 +41,9 @@
   export default {
     name: 'app',
     beforeCreate() {
-      this.$http.get(this.url).then(() => { this.connected = true })
+      this.$http.get(this.url).then((data) => {
+        if (data.status === 200) this.connected = true
+      })
       if (this.$vuetify.breakpoint.name == 'xs')
         this.canvasSize = window.innerWidth - 50 + ''
     },
