@@ -41,17 +41,18 @@
   export default {
     name: 'app',
     beforeCreate() {
-      this.$http.get(this.url).then((data) => {
-        if (data.status === 200) this.connected = true
-      })
       if (this.$vuetify.breakpoint.name == 'xs')
         this.canvasSize = window.innerWidth - 50 + ''
     },
     mounted: function() {
+      this.$http.get(this.url).then(() => {
+        this.connected = true
+      })
+
       this.canvas = document.getElementById("canvas")
       this.context = this.canvas.getContext("2d")
-      this.context.strokeStyle ="#FFFFFF"
-      this.context.lineCap="round"
+      this.context.strokeStyle = "#FFFFFF"
+      this.context.lineCap = "round"
       this.context.lineJoin = "round"
       this.context.lineWidth = this.canvasSize / 10
 
