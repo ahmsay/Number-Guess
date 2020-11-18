@@ -34,7 +34,7 @@
       <span v-if="!connected">Connecting</span>
       <span v-if="connected">Connected</span>
       <div class="mt-5">
-        <v-btn icon color="white">
+        <v-btn @click="goToSource" icon color="white">
           <v-icon large>mdi-github</v-icon>  
         </v-btn>
       </div>
@@ -155,6 +155,9 @@
         const predSorted = new Array(...predictions).sort((a, b) => { return a - b });
         this.firstGuess = predictions.indexOf(predSorted[9]);
         this.secondGuess = predictions.indexOf(predSorted[8]);
+      },
+      goToSource: function() {
+        window.open("https://github.com/ahmsay/Number-Guess", "_blank");
       }
     }
   }
