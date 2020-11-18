@@ -33,6 +33,11 @@
     <div align="center" class="overline white--text">
       <span v-if="!connected">Connecting</span>
       <span v-if="connected">Connected</span>
+      <div class="mt-5">
+        <v-btn icon color="white">
+          <v-icon large>mdi-github</v-icon>  
+        </v-btn>
+      </div>
     </div>
   </v-app>
 </template>
