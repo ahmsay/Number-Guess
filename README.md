@@ -7,10 +7,9 @@ Try it on https://number-guess-conv.web.app/
 </p>
 
 ## Useful scripts
-
-## Run
+### Run
 `npm run serve`
-## Build
+### Build
 `npm run build`
-## Deploy
+### Deploy
 `firebase deploy`
