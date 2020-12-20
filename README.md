@@ -7,6 +7,8 @@ Try it on https://number-guess-conv.web.app/
 </p>
 
 ## Useful scripts
+### Install Modules
+`npm install`
 ### Run
 `npm run serve`
 ### Build
