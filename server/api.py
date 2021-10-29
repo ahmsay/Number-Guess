@@ -1,11 +1,11 @@
+import tensorflow as tf
 from flask import Flask, request
 from flask_cors import CORS
 from flask_restful import Resource, Api
-import keras
+from tensorflow import keras
 from keras.preprocessing import image
 import numpy as np
 from PIL import Image
-import tensorflow as tf
 import base64
 from io import BytesIO
 from keras.models import model_from_json
@@ -16,8 +16,6 @@ json_file.close()
 loaded_model = model_from_json(loaded_model_json)
 loaded_model.load_weights("classifier.h5")
 loaded_model.compile(loss=keras.losses.categorical_crossentropy, optimizer=keras.optimizers.Adadelta(), metrics=['accuracy'])
-loaded_model._make_predict_function()
-graph = tf.get_default_graph()
 
 app = Flask(__name__)
 api = Api(app)
@@ -37,8 +35,7 @@ class Test(Resource):
             im = image.img_to_array(im)
             im = im / 255
             im = np.expand_dims(im, axis = 0)
-            with graph.as_default():
-                pred = loaded_model.predict(im)
+            pred = loaded_model.predict(im)
             pred = pred.tolist()
             return {'pred': pred[0]}
         except Exception as e:
