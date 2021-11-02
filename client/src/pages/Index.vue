@@ -32,8 +32,8 @@
     </v-container>
     <div align="center" class="overline white--text">
       <div class="mt-8 mb-5">
-        <v-btn @click="goToSource" icon color="white">
-          <v-icon large>mdi-github</v-icon>  
+        <v-btn class="white--text" text @click="goToSource">
+          Github
         </v-btn>
       </div>
     </div>
