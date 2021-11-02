@@ -44,8 +44,11 @@
   export default {
     name: 'app',
     beforeCreate() {
-      if (this.$vuetify.breakpoint.name == 'xs')
-        this.canvasSize = window.innerWidth - 50 + ''
+      if (this.$vuetify.breakpoint.name == 'xs') {
+        if (process.isClient) {
+          this.canvasSize = window.innerWidth - 50 + ''
+        }
+      }
     },
     mounted: function() {
       this.canvas = document.getElementById("canvas")
@@ -144,11 +147,12 @@
         .then(response => response.json())
         .then(data => {
           this.display(data.body)
+          this.loading = false
         })
         .catch((error) => {
           console.log(error)
+          this.loading = false
         })
-        this.loading = false
       },
       display: function(predictions) {
         const predSorted = new Array(...predictions).sort((a, b) => { return a - b });
@@ -156,7 +160,9 @@
         this.secondGuess = predictions.indexOf(predSorted[8]);
       },
       goToSource: function() {
-        window.open("https://github.com/ahmsay/Number-Guess", "_blank");
+        if (process.isClient) {
+          window.open("https://github.com/ahmsay/Number-Guess", "_blank");
+        }
       }
     }
   }
