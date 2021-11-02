@@ -48,9 +48,6 @@
         this.canvasSize = window.innerWidth - 50 + ''
     },
     mounted: function() {
-      this.$http.get(this.url).then(() => {
-        this.connected = true
-      })
       this.canvas = document.getElementById("canvas")
       this.context = this.canvas.getContext("2d")
       this.context.strokeStyle = "#FFFFFF"
@@ -82,8 +79,7 @@
     },
     data() {
       return {
-        url: 'https://safe-tor-75945.herokuapp.com/',
-        connected: false,
+        url: 'https://93hun98wuj.execute-api.eu-central-1.amazonaws.com/default',
         firstGuess: '-',
         secondGuess: '-',
         mouse: {
@@ -135,17 +131,24 @@
         this.secondGuess = '-'
       },
       send: function() {
-        if (this.connected) {
-          this.loading = true
-          const dataURL = this.canvas.toDataURL();
-          this.$http.post(this.url, { 'data': dataURL })
-          .then(function(data){
-            this.display(data.body.pred)
-            this.loading = false
-          })
-        } else {
-          alert("The server is not ready yet. It will be ready in a few seconds.")
-        }
+        this.loading = true
+        const dataURL = this.canvas.toDataURL();
+
+        fetch(this.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 'data': dataURL })
+        })
+        .then(response => response.json())
+        .then(data => {
+          this.display(data.body)
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+        this.loading = false
       },
       display: function(predictions) {
         const predSorted = new Array(...predictions).sort((a, b) => { return a - b });

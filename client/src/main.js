@@ -1,12 +1,19 @@
-import Vue from 'vue'
-import App from './App.vue'
-import vuetify from './plugins/vuetify'
-import VueResource from 'vue-resource'
+import DefaultLayout from '~/layouts/Default.vue'
+import Vuetify from 'vuetify'
+import "vuetify/dist/vuetify.min.css"
 
-Vue.use(VueResource);
-Vue.config.productionTip = false
-
-new Vue({
-  vuetify,
-  render: h => h(App)
-}).$mount('#app')
+export default function (Vue, { appOptions }) {
+  // Set default layout as a global component
+  Vue.use(Vuetify);
+  appOptions.vuetify = new Vuetify({
+    theme: {
+      themes: {
+        dark: {
+          background: '#35495e',
+          card: '#48627c'
+        }
+      }
+    }
+  });
+  Vue.component('Layout', DefaultLayout);
+}
