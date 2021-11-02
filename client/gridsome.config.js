@@ -6,5 +6,6 @@
 
 module.exports = {
   siteName: 'Number Guess',
+  titleTemplate: '%s',
   plugins: []
 }
