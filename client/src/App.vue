@@ -32,8 +32,8 @@
     </v-container>
     <div align="center" class="overline white--text">
       <div class="mt-8 mb-5">
-        <v-btn class="white--text" text @click="goToSource">
-          Github
+        <v-btn @click="goToSource" icon color="white">
+          <v-icon large>mdi-github</v-icon>  
         </v-btn>
       </div>
     </div>
@@ -44,11 +44,8 @@
   export default {
     name: 'app',
     beforeCreate() {
-      if (this.$vuetify.breakpoint.name == 'xs') {
-        if (process.isClient) {
-          this.canvasSize = window.innerWidth - 50 + ''
-        }
-      }
+      if (this.$vuetify.breakpoint.name == 'xs')
+        this.canvasSize = window.innerWidth - 50 + ''
     },
     mounted: function() {
       this.canvas = document.getElementById("canvas")
@@ -83,6 +80,7 @@
     data() {
       return {
         url: 'https://93hun98wuj.execute-api.eu-central-1.amazonaws.com/default',
+        connected: false,
         firstGuess: '-',
         secondGuess: '-',
         mouse: {
@@ -135,23 +133,17 @@
       },
       send: function() {
         this.loading = true
-        const dataURL = this.canvas.toDataURL();
+        const dataURL = this.canvas.toDataURL()
 
-        fetch(this.url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ 'data': dataURL })
-        })
-        .then(response => response.json())
-        .then(data => {
-          this.display(data.body)
+        this.$http.post(this.url, { 'data': dataURL })
+        .then(function(data){
+          this.display(data.body.body)
           this.loading = false
         })
         .catch((error) => {
           console.log(error)
           this.loading = false
+          alert('An error occured. See the logs for details.')
         })
       },
       display: function(predictions) {
@@ -160,9 +152,7 @@
         this.secondGuess = predictions.indexOf(predSorted[8]);
       },
       goToSource: function() {
-        if (process.isClient) {
-          window.open("https://github.com/ahmsay/Number-Guess", "_blank");
-        }
+        window.open("https://github.com/ahmsay/Number-Guess", "_blank");
       }
     }
   }
