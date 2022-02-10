@@ -4,9 +4,9 @@
       <v-row>
         <v-col cols="12">
           <v-row justify="center">
-            <v-card :style="{background: $vuetify.theme.themes['dark'].card}" class="mt-6">
+            <v-card :style="{background: $vuetify.theme.themes['dark'].card}">
               <v-card-text>
-                <p class="white--text text-center title">Draw a number</p>
+                <p class="white--text text-center title">Draw a Number</p>
                 <canvas id="canvas" style="background: black" @mouseleave="handleInputEnd" :width="canvasSize" :height="canvasSize"/>
                 <div class="title white--text mt-3">
                   Your number: {{firstGuess}}
@@ -15,7 +15,7 @@
                   Second guess: {{secondGuess}}
                 </div>
               </v-card-text>
-              <v-card-text class="mb-1">
+              <v-card-text class="pt-0 pb-2">
                 <v-layout row wrap>
                   <v-flex xs6 sm6 md6>
                     <v-btn class="white--text" block text @click="send" :loading="loading">Predict</v-btn>
@@ -31,7 +31,9 @@
       </v-row>
     </v-container>
     <div align="center" class="overline white--text">
-      <div class="mt-8 mb-5">
+      <span v-if="!connected">Connecting</span>
+      <span v-if="connected">Connected</span>
+      <div class="mt-5 mb-5">
         <v-btn @click="goToSource" icon color="white">
           <v-icon large>mdi-github</v-icon>  
         </v-btn>
@@ -48,12 +50,17 @@
         this.canvasSize = window.innerWidth - 50 + ''
     },
     mounted: function() {
+      this.$http.get(this.url).then(() => {
+        this.connected = true
+      })
+
       this.canvas = document.getElementById("canvas")
       this.context = this.canvas.getContext("2d")
       this.context.strokeStyle = "#FFFFFF"
       this.context.lineCap = "round"
       this.context.lineJoin = "round"
       this.context.lineWidth = this.canvasSize / 10
+
       this.canvas.addEventListener("mousedown", function (event) {
         this.handleInputStart(event.pageX, event.pageY)
       }.bind(this), false)
@@ -79,7 +86,7 @@
     },
     data() {
       return {
-        url: 'https://93hun98wuj.execute-api.eu-central-1.amazonaws.com/default',
+        url: 'https://safe-tor-75945.herokuapp.com/',
         connected: false,
         firstGuess: '-',
         secondGuess: '-',
@@ -132,19 +139,17 @@
         this.secondGuess = '-'
       },
       send: function() {
-        this.loading = true
-        const dataURL = this.canvas.toDataURL()
-
-        this.$http.post(this.url, { 'data': dataURL })
-        .then(function(data){
-          this.display(data.body.body)
-          this.loading = false
-        })
-        .catch((error) => {
-          console.log(error)
-          this.loading = false
-          alert('An error occured. See the logs for details.')
-        })
+        if (this.connected) {
+          this.loading = true
+          const dataURL = this.canvas.toDataURL();
+          this.$http.post(this.url, { 'data': dataURL })
+          .then(function(data){
+            this.display(data.body.pred)
+            this.loading = false
+          })
+        } else {
+          alert("The server is not ready yet. It will be ready in a few seconds.")
+        }
       },
       display: function(predictions) {
         const predSorted = new Array(...predictions).sort((a, b) => { return a - b });
