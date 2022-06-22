@@ -4,6 +4,6 @@ Flask-RESTful==0.3.6
 gunicorn==19.9.0
 Keras==2.2.0
 Keras-Preprocessing==1.0.1
-numpy==1.14.3
+numpy==1.22.0
 Pillow>=7.1.0
 tensorflow==2.5.1
