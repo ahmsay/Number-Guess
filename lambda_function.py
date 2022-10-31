@@ -31,7 +31,7 @@ def generate_result(result):
     return {"first_guess": first_guess, "second_guess": second_guess}
 
 def lambda_handler(event, context):
-    base64_encoded_image = event["image"]
+    base64_encoded_image = event["body"]
     data = convert_image_for_prediction(base64_encoded_image)
     response = runtime.invoke_endpoint(EndpointName="number-guess", ContentType='application/json', Body=data)
     predictions = json.loads(response['Body'].read().decode())
