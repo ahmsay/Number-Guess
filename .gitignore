@@ -3,6 +3,7 @@ old/client/node_modules
 old/client/package-lock.json
 old/client/babel.config.js
 old/client/dist
-package
-package2
-.DS_Store
+client/node_modules
+client/package-lock.json
+client/dist
+.DS_STORE
