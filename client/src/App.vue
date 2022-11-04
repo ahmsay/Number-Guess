@@ -1,15 +1,39 @@
 <template>
-  <div>
-    <canvas id="canvas" style="background: black" @mouseleave="handleInputEnd" :width="canvasSize" :height="canvasSize"/>
-  </div>
-  <div>
-    Your number: {{firstGuess}}
-  </div>
-  <div>
-    Second guess: {{secondGuess}}
-  </div>
-  <button @click="send" :loading="loading">Predict</button>
-  <button @click="clear">Clear</button>
+  <v-app :style="{background: '#35495e'}">
+    <v-main>
+      <v-container fluid>
+        <v-row>
+          <v-col cols="12">
+            <v-row justify="center">
+              <v-card class="mt-5" :style="{background: '#48627c'}">
+                <v-card-text>
+                  <p class="text-h6 text-center font-weight-bold text-white mb-4">Draw a number below.</p>
+                  <canvas id="canvas" :style="{background: 'black', borderRadius: '6px'}" @mouseleave="handleInputEnd" :width="canvasSize" :height="canvasSize"/>
+                  <div class="title text-white mt-3 text-h6 font-weight-bold">
+                    Your number: {{ firstGuess }}
+                  </div>
+                  <div class="text-white">
+                    Second guess: {{ secondGuess }}
+                  </div>
+                </v-card-text>
+                <v-card-text class="pt-0 pb-2">
+                  <div class="d-flex justify-space-around">
+                    <v-btn variant="text" class="text-white font-weight-bold" @click="send" :loading="loading">Predict</v-btn>
+                    <v-btn variant="text" class="text-white font-weight-bold" @click="clear">Clear</v-btn>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </v-row>
+          </v-col>
+        </v-row>
+      </v-container>
+      <div class="d-flex justify-center mt-5 mb-5">
+        <v-btn variant="text" icon @click="goToSource" color="white">
+          <v-icon size="x-large">fa-brands fa-github</v-icon>
+        </v-btn>
+      </div>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
@@ -32,7 +56,7 @@
         canvasSize: '300'
       }
     },
-    mounted: function() {
+    mounted() {
       this.canvas = document.getElementById("canvas")
       this.context = this.canvas.getContext("2d")
       this.context.strokeStyle = "#FFFFFF"
@@ -110,6 +134,7 @@
         .then(data => {
           this.firstGuess = data.first_guess
           this.secondGuess = data.second_guess
+          this.loading = false
         })
       },
       display: function(predictions) {
