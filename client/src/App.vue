@@ -19,7 +19,7 @@
                 <v-card-text class="pt-0 pb-2">
                   <div class="d-flex justify-space-around">
                     <v-btn variant="text" class="text-white font-weight-bold" @click="send" :loading="loading">Predict</v-btn>
-                    <v-btn variant="text" class="text-white font-weight-bold" @click="clear">Clear</v-btn>
+                    <v-btn variant="text" class="text-white font-weight-bold" @click="clear" :disabled="loading">Clear</v-btn>
                   </div>
                 </v-card-text>
               </v-card>
@@ -57,38 +57,12 @@
       }
     },
     mounted() {
-      this.canvas = document.getElementById("canvas")
-      this.context = this.canvas.getContext("2d")
-      this.context.strokeStyle = "#FFFFFF"
-      this.context.lineCap = "round"
-      this.context.lineJoin = "round"
-      this.context.lineWidth = this.canvasSize / 10
-
-      this.canvas.addEventListener("mousedown", function (event) {
-        this.handleInputStart(event.pageX, event.pageY)
-      }.bind(this), false)
-      this.canvas.addEventListener("mouseup", function () {
-        this.handleInputEnd()
-      }.bind(this), false)
-      this.canvas.addEventListener("mousemove", function (event) {
-        this.handleInputMove(event.pageX, event.pageY)
-      }.bind(this), false)
-      
-      this.canvas.addEventListener("touchstart", function (event) {
-        event.preventDefault()
-        this.handleInputStart(event.touches[0].clientX, event.touches[0].clientY)
-      }.bind(this), false)
-      this.canvas.addEventListener("touchend", function () {
-        event.preventDefault()
-        this.handleInputEnd()
-      }.bind(this), false)
-      this.canvas.addEventListener("touchmove", function (event) {
-        event.preventDefault()
-        this.handleInputMove(event.touches[0].clientX, event.touches[0].clientY)
-      }.bind(this), false)
+      this.setUpCanvas()
+      this.handleMouseEvents()
+      this.handleTouchEvents()
     },
     computed: {
-      currentMouse: function() {
+      currentMouse() {
         let rect = this.canvas.getBoundingClientRect()
         return {
           x: this.mouse.current.x - rect.left,
@@ -97,32 +71,65 @@
       }
     },
     methods: {
-      handleInputStart: function(x, y) {
+      setUpCanvas() {
+        this.canvas = document.getElementById("canvas")
+        this.context = this.canvas.getContext("2d")
+        this.context.strokeStyle = "#FFFFFF"
+        this.context.lineCap = "round"
+        this.context.lineJoin = "round"
+        this.context.lineWidth = this.canvasSize / 10
+      },
+      handleMouseEvents() {
+        this.canvas.addEventListener("mousedown", function (event) {
+          this.handleInputStart(event.pageX, event.pageY)
+        }.bind(this), false)
+        this.canvas.addEventListener("mouseup", function () {
+          this.handleInputEnd()
+        }.bind(this), false)
+        this.canvas.addEventListener("mousemove", function (event) {
+          this.handleInputMove(event.pageX, event.pageY)
+        }.bind(this), false)
+      },
+      handleTouchEvents() {
+        this.canvas.addEventListener("touchstart", function (event) {
+          event.preventDefault()
+          this.handleInputStart(event.touches[0].clientX, event.touches[0].clientY)
+        }.bind(this), false)
+          this.canvas.addEventListener("touchend", function (event) {
+          event.preventDefault()
+          this.handleInputEnd()
+        }.bind(this), false)
+          this.canvas.addEventListener("touchmove", function (event) {
+          event.preventDefault()
+          this.handleInputMove(event.touches[0].clientX, event.touches[0].clientY)
+        }.bind(this), false)
+      },
+      handleInputStart(x, y) {
         this.mouse.down = true
         this.mouse.current = { x, y }
         this.context.beginPath()
         this.context.moveTo(this.currentMouse.x, this.currentMouse.y)
       },
-      handleInputEnd: function() {
+      handleInputEnd() {
         this.mouse.down = false
         this.context.closePath()
       },
-      handleInputMove: function(x, y) {
+      handleInputMove(x, y) {
         this.mouse.current = { x, y }
         this.draw()
       },
-      draw: function() {
+      draw() {
         if (this.mouse.down) {
           this.context.lineTo(this.currentMouse.x, this.currentMouse.y)
           this.context.stroke()
         }
       },
-      clear: function() {
+      clear() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
         this.firstGuess = '-'
         this.secondGuess = '-'
       },
-      send: function() {
+      send() {
         this.loading = true
         const dataURL = this.canvas.toDataURL();
         fetch(this.url, {
@@ -137,10 +144,7 @@
           this.loading = false
         })
       },
-      display: function(predictions) {
-        console.log(predictions)
-      },
-      goToSource: function() {
+      goToSource() {
         window.open("https://github.com/ahmsay/Number-Guess", "_blank");
       }
     }
