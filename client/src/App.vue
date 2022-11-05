@@ -77,7 +77,7 @@
         this.context.strokeStyle = "#FFFFFF"
         this.context.lineCap = "round"
         this.context.lineJoin = "round"
-        this.context.lineWidth = this.canvasSize / 10
+        this.context.lineWidth = this.canvasSize / 12
       },
       handleMouseEvents() {
         this.canvas.addEventListener("mousedown", function (event) {
