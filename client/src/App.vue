@@ -7,7 +7,7 @@
             <v-row justify="center">
               <v-card class="mt-5" :style="{background: '#48627c'}">
                 <v-card-text>
-                  <p class="text-h6 text-center font-weight-bold text-white mb-4">Draw a number below.</p>
+                  <p class="text-h6 text-center font-weight-bold text-white mb-4">{{ title }}</p>
                   <canvas id="canvas" :style="{background: 'black', borderRadius: '6px'}" @mouseleave="handleInputEnd" :width="canvasSize" :height="canvasSize"/>
                   <div class="title text-white mt-3 text-h6 font-weight-bold">
                     Your number: {{ firstGuess }}
@@ -41,6 +41,13 @@
     data() {
       return {
         url: 'https://w2jmrv6qirtajgutl7gqeo3c440npwlp.lambda-url.eu-central-1.on.aws',
+        title: '-',
+        messages: {
+          initial: 'Draw a number below.',
+          processing: 'Processing...',
+          done: 'Done!',
+          error: 'Error :('
+        },
         firstGuess: '-',
         secondGuess: '-',
         mouse: {
@@ -57,6 +64,7 @@
       }
     },
     mounted() {
+      this.title = this.messages.initial
       this.setUpCanvas()
       this.handleMouseEvents()
       this.handleTouchEvents()
@@ -128,9 +136,11 @@
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
         this.firstGuess = '-'
         this.secondGuess = '-'
+        this.title = this.messages.initial
       },
       send() {
         this.loading = true
+        this.title = this.messages.processing
         const dataURL = this.canvas.toDataURL();
         fetch(this.url, {
           method:  'POST',
@@ -142,6 +152,12 @@
           this.firstGuess = data.first_guess
           this.secondGuess = data.second_guess
           this.loading = false
+          this.title = this.messages.done
+        }).catch(error => {
+          this.loading = false
+          this.title = this.messages.error
+          console.error(error)
+          alert("There was an error. Please try again later.")
         })
       },
       goToSource() {
