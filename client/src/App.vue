@@ -13,7 +13,7 @@
                     Your number: {{ firstGuess }}
                   </div>
                   <div class="text-white">
-                    Second guesss: {{ secondGuess }}
+                    Second guess: {{ secondGuess }}
                   </div>
                 </v-card-text>
                 <v-card-text class="pt-0 pb-2">
